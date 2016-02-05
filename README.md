@@ -53,6 +53,7 @@ bintag`i1:
 - [Offset expressions](#offset-expressions)
 - [Length expressions](#length-expressions)
 - [Base for offset calculations](#base-for-offset-calculations)
+- [Compiled templates](#compiled-templates)
 
 ## Substitutions
 
@@ -478,7 +479,7 @@ bintag`i1: 1 #(x: ddee i4: p)`
 // = <Buffer 01 04>
 ```
 
-## Compiling a template
+## Compiled templates
 
 You can get a “compiled template” object by using `bintag.compile` in a tagged template
 expression:
@@ -518,3 +519,6 @@ let t = bintag.compile`x: aa bb`;
 bintag`2*${t}`
 // = <Buffer aa bb aa bb>
 ```
+
+Arrays, buffers and other objects referred to by substitution expressions, must
+not be modified between the compilation and any use of a template.
