@@ -1,0 +1,13 @@
+{
+    "name": "bintag",
+    "version": "1.0.0",
+    "description": "A module for creating buffers using tagged template strings",
+    "keywords": ["binary", "buffer", "tagged template", "template string", "testing"],
+    "bugs": "https://github.com/feldgendler/bintag/issues",
+    "license": "MIT",
+    "author": "Alexey Feldgendler <alexey@feldgendler.ru>",
+    "files": ["index.js"],
+    "main": "index.js",
+    "repository": "feldgendler/bintag",
+    "engines": {"node": ">=4.2.0"}
+}
