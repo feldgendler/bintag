@@ -484,13 +484,13 @@ bintag`i1: 1 #(x: ddee i4: p)`
 You can get a “compiled template” object by using `bintag.compile` in a tagged template
 expression:
 
-```
+```js
 let t = bintag.compile`x: aa bb`;
 ```
 
 This also works for shortcuts:
 
-```
+```js
 let short = bintag.tag('i2:');
 let t = short.compile`1 2`;
 ```
