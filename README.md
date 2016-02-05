@@ -158,7 +158,7 @@ The format specifier is just `x`. It expects an even number of hexadecimal
 digits:
 
 ```js
-bintag`x: 12 34 abcdef`
+bintag`x: 12 34 abCDef`
 // = <Buffer 12 34 ab cd ef>
 ```
 
@@ -260,3 +260,200 @@ bintag`a8p1: ${['abc', '0123456789']}`
 ```
 
 The UTF-16 encoding is affected by endianness, but ASCII and UTF-8 are not.
+
+## Endianness
+
+By default, data is formatted according to the endianness of the host platform.
+This can be overridden by the endianness specifiers: `LE:` for little-endian
+and `BE:` for big-endian. An endianness specifier remains in effect until
+overridden by another such specifier.
+
+```js
+bintag`i2: LE: 0xabcd BE: 0x1122 0xabcd LE: 0x1122`
+// = <Buffer cd ab 11 22 ab cd 22 11>
+```
+
+**Note:** endianness specifiers are case-sensitive.
+
+## Shortcut tags
+
+You can call `bintag.tag` to create a shortcut to a particular set of options.
+The shortcut can be used in tagged template expressions in place of `bintag`:
+
+```js
+let short = bintag.tag('i2:');
+short`1 2`
+// = <Buffer 01 00 02 00>
+let utf16le = bintag.tag('LE:U:');
+utf16le`${'abc'}`
+// = <Buffer 61 00 62 00 63 00>
+```
+
+The use of a shortcut is equivalent to specifying the options at the start of
+the template.
+
+The following convenience shortcuts are already defined in the `bintag` module:
+`bintag.LE` for `LE:`, `bintag.BE` for `BE:`, and `bintag.hex` for `x:`.
+
+```js
+bintag.BE`i2: 1`
+// = <Buffer 00 01>
+```
+
+Here is another convenient way to use the predefined shortcuts:
+
+```js
+let hex = require('bintag').hex;
+hex`aa bb`
+// = <Buffer aa bb>
+```
+
+## Groups
+
+A parenthesized group allows you to override format and endianness, and the
+original settings will be restored after the group ends:
+
+```js
+bintag`i1: 1 2 (i2: 3 4) 5 6`
+// = <Buffer 01 02 03 00 04 00 05 06>
+```
+
+Groups can be nested. At the start of a group, settings are inherited from the
+surrounding context.
+
+## Repeat count
+
+An nonnegative integer followed by an asterisk specifies a repeat count for the
+immediately following value or parenthesized group:
+
+```js
+bintag`x: 2*(4*aa 2*1234)`
+// = <Buffer aa aa aa aa 12 34 12 34 aa aa aa aa 12 34 12 34>
+```
+
+The repeat count can be given by a substitution expression:
+
+```js
+let n = 6, x = 8;
+bintag`i1: ${n}*${x}`
+// = <Buffer 08 08 08 08 08 08>
+```
+
+## Alignment
+
+Use `p` followed by a positive integer to pad the data with zero bytes up to a
+multiple of a number:
+
+```js
+bintag`x: aa bb cc p4 dd p2 ee p16`
+// = <Buffer aa bb cc 00 dd 00 ee 00 00 00 00 00 00 00 00 00>
+```
+
+A substitution expression can be used instead of an integer constant to specify
+the alignment.
+
+Without a number, `p` aligns to the width determined by the current format. For
+integer and floating-point formats, the format's size is used. For UTF-16
+strings, the alignment is 2 bytes. For all other formats, bare `p` has no
+effect because the alignment is 1 byte.
+
+```js
+bintag`i4: 1 p 2 (x: aa bb) p 3 4`
+// = <Buffer 01 00 00 00 02 00 00 00 aa bb 00 00 03 00 00 00 04 00 00 00>
+```
+
+*Note:* see below for information about what offsets are relative to.
+
+## Padding
+
+The `=` character followed by a nonnegative integer pads the data with zero
+bytes until the offset from the beginning of the buffer becomes equal to the
+number.
+
+```js
+bintag`x: aa bb =4 cc dd`
+// = <Buffer aa bb 00 00 cc dd>
+```
+
+An attempt to rewind before the current position will trigger an exception.
+
+A substitution expression can be used instead of an integer constant to specify
+the offset.
+
+*Note:* see below for information about what offsets are relative to.
+
+## Offset expressions
+
+The `@` character followed by a nonnegative integer computes the offset at
+which a parenthesized group in the current template ends up in the output
+buffer. `@1` refers to the group whose opening bracket is the leftmost, `@2` to
+the second leftmost one, and so on. `@0` refers to the whole template (and
+therefore evaluates to 0). Such references can occur before, within, and after
+the groups they refer to.
+
+```js
+bintag`x: cc (i2: 1 @2) (i2: 2 @1)`
+// = <Buffer cc 01 00 05 00 02 00 01 00>
+```
+
+The offset will be encoded according to the current format specifier.
+
+A substitution expression **cannot** be used in place of the integer after the
+`@` character.
+
+*Note:* see below for information about what offsets are relative to.
+
+## Length expressions
+
+The `#` character followed by a nonnegative integer computes the length a
+parenthesized group in the current template occupies in the output buffer. `#0`
+refers to the whole template.
+
+```js
+bintag`i2: (1 #1) #0`
+// = <Buffer 01 00 04 00 06 00>
+```
+
+If the group referred to has a repeat count, the size of the content is taken
+before the repeat count is applied.
+
+The length will be encoded according to the current format specifier.
+
+When `#` is instead followed by a substitution expression, the size of the data
+is computed; however, the data itself is not placed into the output buffer.
+This is useful to compute the size of a buffer or a list of buffers:
+
+```js
+let buf = bintag`x: aabb ccdd`;
+bintag`i2: #${buf}`
+// = <Buffer 04 00>
+```
+
+Finally, `#` can be followed by a parenthesized group. In this case, the size
+that group would take in the output buffer is computed; however, the group
+itself does not produce output.
+
+```js
+bintag`i2: #(az: ${'abc'})`
+// = <Buffer 04 00>
+```
+
+## Base for offset calculations
+
+Normally, offsets for purposes of alignment, padding, and offset expressions,
+are relative to the start of the output buffer. However, within a parenthesized
+group with a repeat count, even if the repeat count is 1, offsets are instead
+relative to the start of the (innermost such) group.
+
+```js
+bintag`x: 00 2*(aa =4 bb p2 cc)`
+// = <Buffer 00 aa 00 00 00 bb 00 cc aa 00 00 00 bb 00 cc>
+```
+
+The same applies within parenthesized groups preceded by `#`.
+
+```js
+bintag`i1: 1 #(x: ddee i4: p)`
+// = <Buffer 01 04>
+```
+
