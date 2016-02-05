@@ -16,8 +16,10 @@ The simplest example:
 
 ```js
 bintag`i4: 1 2 -10 0xaabbccdd`
+// = <Buffer 01 00 00 00 02 00 00 00 f6 ff ff ff dd cc bb aa>
 ```
-Result: `<Buffer 01 00 00 00 02 00 00 00 f6 ff ff ff dd cc bb aa>`
+
+The expression evaluates to a new `Buffer` instance.
 
 The `i4:` is a _format specifier_ which means that the numbers following it
 should be formatted as 4-byte integers.
