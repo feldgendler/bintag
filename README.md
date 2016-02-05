@@ -514,7 +514,7 @@ A “compiled template” has the following API:
 Compiled templates and arrays of compiled templates can be used within other
 templates, in a manner similar to buffers:
 
-```
+```js
 let t = bintag.compile`x: aa bb`;
 bintag`2*${t}`
 // = <Buffer aa bb aa bb>
