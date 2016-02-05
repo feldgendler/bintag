@@ -94,14 +94,30 @@ Arrays and nested arrays of buffers are also supported. You can even mix
 buffers with immediate values in the same array. An empty array produces no
 buffer content.
 
+Finally, a substitution expression can evaluate to a compiled `bintag` template
+(see below).
 
-…and even as parts of format specifiers:
+### Substitutions in other positions
+
+A substitution is generally allowed wherever the syntax expects an integer,
+such as in a format specifier:
 
 ```js
 let n=2;
-bintag`i${n}: 
+bintag`i${n}: 1`
+// = <Buffer 01 00>
+```
+
+When used in this way, the substitution expression must evaluate to an integer,
+or to something that can be converted to an integer. (`1.6` will happily become
+`1`, but `{}` becomes `NaN` and will be rejected.)
+
+A substitution cannot be used in place of parts of the syntax that are not
+numbers, such as the letter of a format specifier.
 
 ## Format specifiers
+
+All format specifiers end with a colon. Whitespace after the colon is optional.
 
 A format specifier itself does not produce any buffer content, but it specifies
 the format in which the values following it are to be formatted. The format
@@ -112,5 +128,24 @@ bintag`i1: 1 2 i4: 7 i1: 8`
 // = <Buffer 01 02 07 00 00 00 08>
 ```
 
+*Note:* format specifiers are case-sensitive.
+
 ### Integers
 
+The integer format specifier is the letter `i` followed by a number between 1
+and 6. Each formatted integer will take the specified number of bytes in the
+buffer.
+
+This format specifier accepts decimal integers with an optional sign, as well
+as unsigned hexadecimal nubmers:
+
+```js
+bintag`i1: 1 +1 -1 0x80 128 -128`
+// = <Buffer 01 01 ff 80 80 80>
+```
+
+Both positive and negative values can be used to represent certain bit
+patterns, such as `80` in the example above.
+
+A value that is out of range for both signed and unsigned integers of the
+specified width, will trigger an exception.
