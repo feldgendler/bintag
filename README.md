@@ -149,3 +149,114 @@ patterns, such as `80` in the example above.
 
 A value that is out of range for both signed and unsigned integers of the
 specified width, will trigger an exception.
+
+For `i2` and upwards, endianness matters. See below.
+
+### Hexadecimal data
+
+The format specifier is just `x`. It expects an even number of hexadecimal
+digits:
+
+```js
+bintag`x: 12 34 abcdef`
+// = <Buffer 12 34 ab cd ef>
+```
+
+Whitespace between pairs is optional. The only case when this whitespace
+matters is when a repeat count (see below) is used: it will apply to a whole
+“word” of hexadecimal data.
+
+The `x` format specifier handles substitution expressions like `i1`.
+
+This format is **not** affected by endianness.
+
+### Floating point
+
+The format specifiers are `f` for “float” (32-bit) and `d` for “double”
+(64-bit) types.
+
+```js
+bintag`f: -1.1 d: .5e-10`
+// = <Buffer cd cc 8c bf bb bd d7 d9 df 7c cb 3d>
+```
+
+The standard JS syntax for floating-point literals is supported, including
+`Infinity` with an optional sign, and `NaN`. Note that `-0` produces binary
+data distinct from `0`.
+
+The format is affected by endianness.
+
+### Strings
+
+The three string formats are `a` for ASCII, `u` for UTF-8, and `U` for UTF-16.
+When a string is forced to ASCII, the lower byte of each character's Unicode
+value will be used.
+
+With string formats, substitution expressions **must** be used. There is no
+syntax for string values in the template string.
+
+When a bare string format specifier is used, the result will take exactly the
+number of bytes that are necessary to represent all the characters of a string:
+
+```js
+bintag`a: ${'abc'}`
+// = <Buffer 61 62 63>
+```
+
+If the format letter is followed by an integer constant (or a substitution
+expression evaluating to an integer), the string will take exactly the
+specified number of bytes, and will be truncated or zero-padded as necessary.
+
+```js
+bintag`a4: ${['ab', 'xyzzy']}`
+// = <Buffer 61 62 00 00 78 79 7a 7a>
+```
+
+When a Unicode string is truncated, an incomplete character at the end is never
+encoded. If necessary, the string will be zero-padded:
+
+```js
+bintag`u8: ${'\u1000\u1000\u1000'}`
+// = <Buffer e1 80 80 e1 80 80 00 00>
+```
+
+The `z` modifier adds a terminating zero byte (two bytes in case of UTF-16).
+
+```js
+bintag`az: ${'abc'}`
+// = <Buffer 61 62 63 00>
+```
+
+If `z` is combined with a fixed length, the length includes the terminator, and
+the string is guaranteed to be zero-terminated. This means that it might be
+truncated earlier than without `z` to accomodate the terminator.
+
+The `p` modifier, followed by an integer between 1 and 4 (or a substitution
+expression evaluating to such an integer), makes the string a “Pascal string”:
+length followed by string data. The number specifies the width of the length
+field.
+
+```js
+bintag`ap2: ${'abc'}`
+// = <Buffer 03 00 61 62 63>
+```
+
+For UTF-8, the number of bytes is stored in the length field rather than the
+number of Unicode characters. For UTF-16, the number of two-byte pairs is
+stored, which can be different from the number of Unicode characters when
+surrogate pairs are present.
+
+The length field respects endianness. Strings longer than the maximum length
+than can be represented in a length field of the chosen size (such as 255
+characters for a 1-byte length), will be truncated.
+
+If the `p` modifier is combined with a fixed length, the latter includes the
+size of the length field. Therefore, the fixed length must be greater than the
+size of the length field.
+
+```js
+bintag`a8p1: ${['abc', '0123456789']}`
+// = <Buffer 03 61 62 63 00 00 00 00 07 30 31 32 33 34 35 36>
+```
+
+The UTF-16 encoding is affected by endianness, but ASCII and UTF-8 are not.
