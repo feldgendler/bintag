@@ -34,6 +34,26 @@ bintag`i1:
 // = <Buffer 12 34 56 78>
 ```
 
+## Table of contents
+
+- [Substitutions](#substitutions)
+  - [Substitutions as values](#substitutions-as-values)
+  - [Substitutions in other positions](#substitutions-in-other-positions)
+- [Format specifiers](#format-specifiers)
+  - [Integers](#integers)
+  - [Hexadecimal data](#hexadecimal-data)
+  - [Floating point](#floating-point)
+  - [Strings](#strings)
+- [Endianness](#endianness)
+- [Shortcut tags](#shortcut-tags)
+- [Groups](#groups)
+- [Repeat count](#repeat-count)
+- [Alignment](#alignment)
+- [Padding](#padding)
+- [Offset expressions](#offset-expressions)
+- [Length expressions](#length-expressions)
+- [Base for offset calculations](#base-for-offset-calculations)
+
 ## Substitutions
 
 The template string syntax allows substitutions: `${`_expression_`}`. With
