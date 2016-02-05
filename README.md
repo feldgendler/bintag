@@ -128,7 +128,7 @@ bintag`i1: 1 2 i4: 7 i1: 8`
 // = <Buffer 01 02 07 00 00 00 08>
 ```
 
-*Note:* format specifiers are case-sensitive.
+**Note:**x format specifiers are case-sensitive.
 
 ### Integers
 
