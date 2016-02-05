@@ -10,7 +10,8 @@ A Node.js module for creating buffers using tagged template strings.
 
 This module uses the [tagged template
 string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/template_strings#Tagged_template_strings)
-syntax to fill buffers with structured binary data.
+syntax to fill buffers with structured binary data. This is primarily useful in
+unit tests for code that deals with binary data formats or network protocols.
 
 The simplest example:
 
@@ -457,3 +458,43 @@ bintag`i1: 1 #(x: ddee i4: p)`
 // = <Buffer 01 04>
 ```
 
+## Compiling a template
+
+You can get a “compiled template” object by using `bintag.compile` in a tagged template
+expression:
+
+```
+let t = bintag.compile`x: aa bb`;
+```
+
+This also works for shortcuts:
+
+```
+let short = bintag.tag('i2:');
+let t = short.compile`1 2`;
+```
+
+A “compiled template” has the following API:
+
+* `create()` method: creates and returns a new `Buffer` with the binary data
+  described by the template. This can be called repeatedly to obtain new
+  buffers without re-parsing the template.
+
+* `length` property (read-only): the length of the data described by the
+  template. Can be used to do some sort of allocation or negotiation in
+  advance.
+
+* `write(buf, [offset])` method: writes the data into an existing buffer at the
+  specified offset (defaults to offset 0). The buffer must be large enough to
+  contain the data. A non-zero offset specified here does not affect the offset
+  calculations within the template (that is, the start of the template is still
+  considered to have offset 0).
+
+Compiled templates and arrays of compiled templates can be used within other
+templates, in a manner similar to buffers:
+
+```
+let t = bintag.compile`x: aa bb`;
+bintag`2*${t}`
+// = <Buffer aa bb aa bb>
+```
