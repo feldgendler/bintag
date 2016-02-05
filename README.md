@@ -509,7 +509,7 @@ A “compiled template” has the following API:
   specified offset (defaults to offset 0). The buffer must be large enough to
   contain the data. A non-zero offset specified here does not affect the offset
   calculations within the template (that is, the start of the template is still
-  considered to have offset 0).
+  considered to have offset 0). The method returns the number of bytes written.
 
 Compiled templates and arrays of compiled templates can be used within other
 templates, in a manner similar to buffers:
