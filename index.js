@@ -8,39 +8,6 @@ var bintag = module.exports = Object.assign(tag(''), {
     hex: tag('x:'),
 });
 
-// bintag`LE: ...`
-// bintag`BE: ...`
-// bintag`i1: 1 2 0xcc 200 -1 ${num} ${num_array}`
-// bintag`i2: 1 2 0xccdd ${num} ${num_array}`
-// bintag`i4: 1 -1 0xaabbccdd ${num} ${num_array}`
-// bintag`i6: 1 -1 0xaabbccddeeff ${num} ${num_array}`
-// bintag`i${size}: ...`
-// bintag`f: 1 2 -1 0.1 -2e-5 ${num} ${num_array}`
-// bintag`d: 1 2 -1 0.1 -2e-5 ${num} ${num_array}`
-// bintag`i1: 1 2 0xcc i2:p` // zero padding
-// bintag`i1: 1 2 p8` // zero padding to a multiple of 8
-// bintag`i1: 1 2 (i4: p 8 16) 3 4` // back to i8
-// bintag`i1: 4*(2*1 2)` // 1 1 2 1 1 2 1 1 2 1 1 2
-// bintag`i1: ${n}*0`
-// bittag`x: 0102ccdd aa bb` // spaces optional
-// bintag`a: ${str}` // ascii bare
-// bintag`a16: ${str}` // ascii fixed-size zero-padded
-// bintag`az: ${str}` // ascii zero-terminated
-// bintag`a16z: ${str}` // ascii fixed-size zero-padded (mandatory terminator)
-// bintag`ap2: ${str}` // ascii pascal, 2-byte size
-// bintag`a16p1: ${str}` // ascii pascal, 1-byte size, fixed-size zero-padded
-// bintag`a${size}: ${str}` // computed length
-// bintag`u: ${str}` // utf8 (all the same size options)
-// bintag`U: ${str}` // utf16 (all the same size options)
-// bintag`${buf}` // include another buffer
-// bintag`${buf_array}` // include a bunch of other buffers
-// bintag`${tpl}` // include another compiled template
-// bintag`i4: #${buf}` // include length of another buffer
-// bintag`i4: #(i4: 1 2)` // include length of a group (but not group content)
-// bintag`i1: 1 =8 2` // zero padding up to the specified offset
-// bintag`i1: #1 (i4: 1 2)` // include size of 1st group
-// bintag`i1: @1 (i4: 1 2)` // include offset of 1st group
-
 function tag(options){
     let tag_fn = function(parts){
         let values = new Array(arguments.length-1);
