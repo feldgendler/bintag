@@ -363,24 +363,24 @@ bintag`i1: ${n}*${x}`
 
 ## Alignment
 
-Use `p` followed by a positive integer to pad the data with zero bytes up to a
+Use `!` followed by a positive integer to pad the data with zero bytes up to a
 multiple of a number:
 
 ```js
-bintag`x: aa bb cc p4 dd p2 ee p16`
+bintag`x: aa bb cc !4 dd !2 ee !16`
 // = <Buffer aa bb cc 00 dd 00 ee 00 00 00 00 00 00 00 00 00>
 ```
 
 A substitution expression can be used instead of an integer constant to specify
 the alignment.
 
-Without a number, `p` aligns to the width determined by the current format. For
+Without a number, `!` aligns to the width determined by the current format. For
 integer and floating-point formats, the format's size is used. For UTF-16
-strings, the alignment is 2 bytes. For all other formats, bare `p` has no
+strings, the alignment is 2 bytes. For all other formats, bare `!` has no
 effect because the alignment is 1 byte.
 
 ```js
-bintag`i4: 1 p 2 (x: aa bb) p 3 4`
+bintag`i4: 1 ! 2 (x: aa bb) ! 3 4`
 // = <Buffer 01 00 00 00 02 00 00 00 aa bb 00 00 03 00 00 00 04 00 00 00>
 ```
 

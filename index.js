@@ -199,11 +199,11 @@ function parse(parts, values)
                     new ItemGroup(group(true, new Context(context))));
                 continue;
             }
-            if (token[0]==='p')
+            if (token[0]==='!')
             {
                 if (repeater!==undefined)
                     throw new ParseError('Unexpected', token);
-                yield new ItemPadding(context,
+                yield new ItemAlign(context,
                     token.length>1 ? parse_int(token.slice(1)) : undefined);
                 continue;
             }
@@ -542,7 +542,7 @@ class ItemValue extends Item {
     }
 }
 
-class ItemPadding extends Item {
+class ItemAlign extends Item {
     constructor(context, align){
         super(context);
         this.align = align;
