@@ -511,6 +511,21 @@ A “compiled template” has the following API:
   calculations within the template (that is, the start of the template is still
   considered to have offset 0). The method returns the number of bytes written.
 
+In addition, a compiled template has a numbered property for each parenthesized
+group in the template. These are objects with `offset` and `length` read-only
+properties that return the offset and length of each parenthesized group.
+
+```js
+let t = bintag.compile`i4: 0 (x: aa bb)`
+t[1].offset
+// = 4
+t[1].length
+// = 2
+```
+
+Note that e.g. `t[1].offset` has the same value as `@1` in the template, and
+`t[1].length` has the same value as `#1` in the template.
+
 Compiled templates and arrays of compiled templates can be used within other
 templates, in a manner similar to buffers:
 

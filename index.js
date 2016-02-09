@@ -227,7 +227,7 @@ function parse(parts, values)
     }
     groups[0] = new ItemGroup(group(false, new Context()));
     groups[0].bind(0);
-    return groups[0];
+    return groups;
 }
 
 function* flatten(obj)
@@ -280,18 +280,26 @@ class Template {
             parts = parts.slice();
             parts[0] = options+' '+parts[0];
         }
-        this.root = parse(parts, values);
+        parse(parts, values).forEach(
+            (group, i) => this[i] = new TemplateGroup(group));
     }
     create(){
         let buf = new Buffer(this.length);
         this.write(buf);
         return buf;
     }
-    get length(){ return this.root.length; }
+    get length(){ return this[0].group.length; }
     write(buf, offset){
-        this.root.encode(buf, offset||0);
-        return this.root.length;
+        let root = this[0].group;
+        root.encode(buf, offset||0);
+        return root.length;
     }
+}
+
+class TemplateGroup {
+    constructor(group){ this.group = group; }
+    get length(){ return this.group.inner_length; }
+    get offset(){ return this.group.offset; }
 }
 
 class Value {
