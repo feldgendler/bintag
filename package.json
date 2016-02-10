@@ -1,6 +1,6 @@
 {
   "name": "bintag",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "A module for creating buffers using tagged template strings",
   "keywords": [
     "binary",
